@@ -13,5 +13,5 @@ def canUnlockAll(boxes):
     return not any(box_locked)
 
 # extend()-> Adds elements to the end of the list
-# not-> Returns True if the statement is not "True" literally, otherwise returns False.
-# any()-> Returns True if any item in "AN ITERABLE" are true, otherwise returns False
+# not-> Returns True if the statement is not "True" literally, otherwise False.
+# any()-> Returns True if any item in "AN ITERABLE" are true, otherwise False
