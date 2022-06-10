@@ -1,89 +1,145 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "sort.h"
 
 /**
- * merge - merge sort
- * @array: pointer
- * @size: size of the array
- * @m: Middle index
- * @temp: pointer
- * Return: void
+ * copy - copies data from one buffer to another
+ *
+ * @src: source buffer
+ * @dst: destination buffer
+ * @size: size of buffers
+ *
+ * Return: No Return
  */
-void merge(int *array, int size, int m, int *temp)
+void copy(int *src, int *dst, int size)
 {
-	int i, j, k;
+	int i;
 
-	printf("Merging...\n[left]: ");
-	print_array(array, m);
-	printf("[right]: ");
-	print_array(array + m, size - m);
-	for (i = 0, j = m, k = 0; k < size; k++)
-	{
-
-		if (j == size)
-		{
-			temp[k] = array[i];
-			i++;
-		}
-		else if (i == m)
-		{
-			temp[k] = array[j];
-			j++;
-		}
-		else if (array[j] < array[i])
-		{
-			temp[k] = array[j];
-			j++;
-		}
-		else
-		{
-			temp[k] = array[i];
-			i++;
-		}
-	}
 	for (i = 0; i < size; i++)
-	{
-		array[i] = temp[i];
-	}
-	printf("[Done]: ");
-	print_array(temp, size);
+		dst[i] = src[i];
 }
-
-
 /**
- * merge_main - merge sort
- * @array: pointer
- * @size: size of the array
- * @temp: pointer
- * Return: void
+ * merge - merges two sets of data in ascending order
+ * but they must already be sorted before hand
+ * @array: first set of data
+ * @buff: second set of data
+ * @minL: lower range of first set of data
+ * @maxL: upper range of first set of data
+ * @minR: lower range of second set of data
+ * @maxR: upper range of second set of data
+ *
+ * Return: No Return
  */
-void merge_main(int *array, size_t size, int *temp)
+void merge(int *array, int *buff, int minL, int maxL, int minR, int maxR)
 {
-	int m;
+	int i = minL, j = minR, k = minL;
 
-	if (size < 2)
-		return;
-	m = size / 2;
-	merge_main(array, m, temp);
-	merge_main(array + m,  size - m, temp);
-	merge(array, size, m, temp);
+	while (i <= maxL || j <= maxR)
+
+		if (i <= maxL && j <= maxR)
+			if (buff[i] <= buff[j])
+				array[k] = buff[i], k++, i++;
+			else
+				array[k] = buff[j], k++, j++;
+
+		else if (i > maxL && j <= maxR)
+			array[k] = buff[j], k++, j++;
+		else
+			array[k] = buff[i], k++, i++;
 }
-
-
 /**
- * merge_sort - merge sort
- * @array: pointer
- * @size: size of the array
- * Return: void
+ * printcheck - prints an array in a given range
+ *
+ * @array: array of data to be print
+ * @r1: start of range
+ * @r2: end of range
+ *
+ * Return: No Return
+ */
+void printcheck(int *array, int r1, int r2)
+{
+	int i;
+
+	for (i = r1; i <= r2; i++)
+	{
+		if (i > r1)
+			printf(", ");
+		printf("%d", array[i]);
+	}
+	printf("\n");
+}
+/**
+ * split - recursive function to split data into merge tree
+ *
+ * @array: array of data to be split
+ * @buff: auxiliary array of data for merging
+ * @min: min range of data in array
+ * @max: max range of data in array
+ * @size: size of total data
+ *
+ * Return: No Return
+ */
+void split(int *array, int *buff, int min, int max, int size)
+{
+	int mid, tmax, minL, maxL, minR, maxR;
+
+	if ((max - min) <= 0)
+		return;
+
+	mid = (max + min + 1) / 2;
+	tmax = max;
+	max = mid - 1;
+
+	minL = min;
+	maxL = max;
+
+	split(array, buff, min, max, size);
+
+	min = mid;
+	max = tmax;
+
+	minR = min;
+	maxR = max;
+
+	split(array, buff, min, max, size);
+
+	printf("Merging...\n");
+	printf("[left]: ");
+
+	printcheck(array, minL, maxL);
+
+	printf("[right]: ");
+
+	printcheck(array, minR, maxR);
+	merge(array, buff, minL, maxL, minR, maxR);
+	copy(array, buff, size);
+
+	printf("[Done]: ");
+	printcheck(array, minL, maxR);
+}
+/**
+ * merge_sort - sorts an array of integers in ascending order
+ * using the Merge sort algorithm
+ *
+ * @array: array of data to be sorted
+ * @size: size of data
+ *
+ * Return: No Return
  */
 void merge_sort(int *array, size_t size)
 {
-	int *temp = NULL;
+	int *buff;
 
-	if (!array || size < 2)
+	if (size < 2)
 		return;
-	temp = malloc(sizeof(int) * size);
-	if (!temp)
+
+	buff = malloc(sizeof(int) * size);
+	if (buff == NULL)
 		return;
-	merge_main(array, size, temp);
-	free(temp);
+
+	copy(array, buff, size);
+
+	split(array, buff, 0, size - 1, size);
+
+	free(buff);
 }
